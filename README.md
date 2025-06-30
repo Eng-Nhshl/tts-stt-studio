@@ -1,8 +1,6 @@
-# AI Multilingual TTS & STT Studio
+# Multilingual TTS & STT Studio
 
 A modern, feature-rich Text-to-Speech (TTS) and Speech-to-Text (STT) application with a sleek, modern UI and advanced features including anomaly detection and multilingual support.
-
-![AI TTS & STT Studio](https://raw.githubusercontent.com/yourusername/tts-stt-studio/main/screenshot.png)
 
 ## Features
 
@@ -21,7 +19,7 @@ A modern, feature-rich Text-to-Speech (TTS) and Speech-to-Text (STT) application
 TTS & STT/
 ├── __pycache__/            # Python bytecode cache
 ├── anomaly_detector.py     # Machine learning-based anomaly detection system
-├── datasets/               # Directory for storing datasets and language models
+├── datasets/               # Directory for storing bad word datasets for languages models
 ├── main.py                # Main application entry point
 ├── requirements.txt        # Project dependencies
 └── stt_tts_gui.py         # GUI implementation with custom components
@@ -56,7 +54,7 @@ TTS & STT/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/tts-stt-studio.git
+git clone https://git@github.com:Eng-Nhshl/tts-stt-studio.git
 ```
 
 2. Install dependencies:
@@ -66,12 +64,17 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Launch the application:
+1. Launch the application for the console interface:
 ```bash
 python main.py
 ```
 
-2. Use the interface:
+2. Launch the application for the GUI interface:
+```bash
+python stt_tts_gui.py
+```
+
+3. Use the interface:
    - Select your preferred language (English/Arabic)
    - Use the "Speak" button for speech-to-text
    - Enter text and use "Convert" for text-to-speech
