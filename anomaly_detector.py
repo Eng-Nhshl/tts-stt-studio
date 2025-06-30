@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import logging
 from typing import Dict, Set
 from sklearn.ensemble import IsolationForest
 import numpy as np
@@ -8,12 +9,23 @@ import librosa
 from collections import deque, defaultdict
 import time
 import warnings
+from config import logging  # sets up logging and provides paths
 import random
+
+logger = logging.getLogger(__name__)
 
 # Suppress sklearn warnings
 warnings.filterwarnings('ignore')
 
 class AnomalyDetector:
+    """Detects offensive or anomalous audio/text.
+
+    An instance is cheap; create one per `STT_TTS_Engine`.  Public API:
+
+    detect_offensive_content(text, language)
+    detect_audio_anomaly(audio_np, sample_rate)
+    detect_text_anomaly(text, language)
+    """
     def __init__(self, n_samples=100, contamination=0.1):
         """Initialize the anomaly detector.
         
@@ -48,7 +60,7 @@ class AnomalyDetector:
         # Ensure models are properly initialized
         if not hasattr(self.audio_model, 'is_fitted_'):
             self._initialize_models()
-            print("Models re-initialized successfully")
+            logger.info("Models re-initialized successfully")
         
     def extract_audio_features(self, audio_data, sample_rate):
         """Extract features from audio data.
@@ -74,7 +86,7 @@ class AnomalyDetector:
             
             return np.array(features)
         except Exception as e:
-            print(f"Error extracting audio features: {str(e)}")
+            logger.error("Error extracting audio features: %s", e)
             return None
     
     def extract_text_features(self, text, language='en'):
@@ -227,25 +239,28 @@ class AnomalyDetector:
             Dict mapping language to set of offensive words
         """
         offensive_words = defaultdict(set)
-        datasets_dir = os.path.join(os.path.dirname(__file__), 'datasets')
+        from config import DATASET_DIR
+        datasets_dir = DATASET_DIR
         
         # Load English words
         try:
-            with open(os.path.join(datasets_dir, 'en.json'), 'r', encoding='utf-8') as f:
+            en_path = datasets_dir / 'en.json'
+            with en_path.open('r', encoding='utf-8') as f:
                 english_words = json.load(f)
                 for word in english_words:
                     offensive_words['en'].add(word.lower())
         except Exception as e:
-            print(f"Warning: Could not load English offensive words: {str(e)}")
+            logger.warning("Could not load English offensive words: %s", e)
 
         # Load Arabic words
         try:
-            with open(os.path.join(datasets_dir, 'ar.json'), 'r', encoding='utf-8') as f:
+            ar_path = datasets_dir / 'ar.json'
+            with ar_path.open('r', encoding='utf-8') as f:
                 arabic_words = json.load(f)
                 for word in arabic_words:
                     offensive_words['ar'].add(word.lower())
         except Exception as e:
-            print(f"Warning: Could not load Arabic offensive words: {str(e)}")
+            logger.warning("Could not load Arabic offensive words: %s", e)
 
         # Add common variations for English words
         if 'en' in offensive_words:
@@ -333,7 +348,7 @@ class AnomalyDetector:
                 # Fit the model with updated samples
                 self.text_model.fit(features_array)
             except Exception as e:
-                print(f"Error retraining text model: {str(e)}")
+                logger.error("Error retraining text model: %s", e)
         
         # Predict anomaly
         prediction = self.text_model.predict([features])

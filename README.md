@@ -1,6 +1,51 @@
 # Multilingual TTS & STT Studio
 
-A modern, feature-rich Text-to-Speech (TTS) and Speech-to-Text (STT) application with a sleek, modern UI and advanced features including anomaly detection and multilingual support.
+A modern, feature-rich Text-to-Speech (TTS) and Speech-to-Text (STT) studio featuring:
+
+* Multilingual support (English 🇬🇧 / Arabic 🇸🇦)
+* Real-time anomaly & offensive-content detection powered by Isolation Forest + bad-word datasets
+* Caching, persistent outputs, and both CLI & PyQt5 GUI front-ends
+* Modular codebase – core engine, GUI, widgets, styles, config – for easy extension
+
+---
+
+## Quick start
+
+```bash
+# install deps
+pip install -r requirements.txt
+
+# run GUI
+python stt_tts_gui.py
+
+# or CLI
+python main.py
+```
+
+Audio outputs land in `outputs/tts/` and transcriptions in `outputs/stt/`.  The `.cache/` folder stores hashed MP3s to avoid redundant requests to gTTS.
+
+---
+
+## Updated project structure
+
+```
+.
+├── core/              # shared STT_TTS_Engine (business logic)
+│   └── engine.py
+├── stt_tts_gui.py     # PyQt5 front-end (thin – layout & signals only)
+├── widgets.py         # reusable glass/neon widgets
+├── styles.py          # centralized Qt style-sheet constants
+├── anomaly_detector.py# audio/text anomaly + offensive-word checks
+├── config.py          # logging + path constants (CACHE_DIR, OUTPUT_DIR …)
+├── datasets/          # offensive words JSON (en.json / ar.json)
+├── outputs/           # generated mp3 / transcripts
+├── .cache/            # TTS cache (auto-created)
+├── main.py            # CLI menu + smoke tests
+└── requirements.txt
+```
+
+See comments/docstrings in each file for detailed explanations.
+
 
 ## Features
 
