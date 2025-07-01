@@ -233,7 +233,10 @@ class MainWindow(QWidget):
         if result:
             self.tts_status.setText("Text successfully converted to speech.")
         else:
-            self.tts_status.setText("Text contains offensive content!")
+            # Keep any specific error message already provided by the engine
+            current = self.tts_status.text()
+            if not current.startswith("Error"):
+                self.tts_status.setText("Could not convert text to speech.")
 
     def on_stt(self):
         language = self.stt_language_combo.currentData()
@@ -253,8 +256,11 @@ class MainWindow(QWidget):
             self.stt_result.setPlainText(text)
             self.stt_status.setText("Speech recognized successfully.")
         else:
+            # Clear text but keep any detailed error message already set via status callback
             self.stt_result.setPlainText("")
-            self.stt_status.setText("No speech detected!")
+            current = self.stt_status.text()
+            if not current.startswith("Error"):
+                self.stt_status.setText("No speech detected.")
 
 
 # --- Main Entrypoint ---

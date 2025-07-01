@@ -17,7 +17,7 @@ from bidi.algorithm import get_display  # noqa: F401
 from anomaly_detector import AnomalyDetector
 from config import logging  # sets up root logger
 
-# Configure NumPy pretty-printing (was previously done in the old file)
+
 np.set_printoptions(precision=3, suppress=True)
 
 # ---------------------------------------------------------------------------
@@ -79,15 +79,38 @@ class STT_TTS_Engine:
                 _notify(status_callback, "Error: Text contains offensive content")
                 raise ValueError("Text contains offensive content")
 
+            # Remove special characters that should be ignored when speaking
+            import re
+
+            cleaned_text = re.sub(r'[!@#$%^&*()_+]+', ' ', text)
+            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+
+            # Remove text not matching the selected language script
+            if language == "ar":
+                # Strip Latin letters when speaking Arabic
+                cleaned_text = re.sub(r'[A-Za-z]+', ' ', cleaned_text)
+            elif language == "en":
+                # Strip Arabic letters when speaking English
+                cleaned_text = re.sub(r'[\u0600-\u06FF]+', ' ', cleaned_text)
+
+            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+
+            if not cleaned_text:
+                _notify(status_callback, "Error: No speakable content after language filtering")
+                raise ValueError("No speakable content after language filtering")
+
             logger.info(
-                "Converting text to speech. Language: %s, Text: %s", language, text
+                "Converting text to speech. Language: %s, Original: %s, Cleaned: %s",
+                language,
+                text,
+                cleaned_text,
             )
 
             from hashlib import sha1
             from config import CACHE_DIR
 
-            # Deterministic cache key by language+text
-            cache_key = sha1(f"{language}:{text}".encode("utf-8")).hexdigest()
+            # Deterministic cache key by language+cleaned_text
+            cache_key = sha1(f"{language}:{cleaned_text}".encode("utf-8")).hexdigest()
             cached_mp3 = CACHE_DIR / f"{cache_key}.mp3"
 
             if cached_mp3.exists():
@@ -100,7 +123,7 @@ class STT_TTS_Engine:
                     tempfile.gettempdir(), f"tts_{uuid.uuid4()}.mp3"
                 )
                 # Synthesize speech and save
-                gTTS(text=text, lang=language).save(temp_filename)
+                gTTS(text=cleaned_text, lang=language).save(temp_filename)
                 try:
                     import shutil
 
@@ -242,5 +265,7 @@ class STT_TTS_Engine:
                         f"Speech recognition service error: {exc}"
                     ) from exc
         except Exception as exc:
+            # Notify any status callback (e.g., GUI) about the specific failure reason
+            _notify(status_callback, str(exc))
             logger.error("Error in speech_to_text: %s", exc)
             return ""
