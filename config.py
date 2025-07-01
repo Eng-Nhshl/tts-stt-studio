@@ -1,9 +1,4 @@
-"""Project-wide configuration and logging setup.
-
-This module is imported at application start-up (both CLI and GUI).
-Importing it once is enough to configure the root logger and expose
-shared constants such as dataset locations and temp-directory paths.
-"""
+"""Project-wide configuration and logging setup."""
 
 from __future__ import annotations
 
@@ -14,8 +9,6 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
-
-# A very small, opinionated configuration: ISO date-time, level, module, msg
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -42,7 +35,7 @@ for _p in (OUTPUT_DIR, OUTPUT_TTS_DIR, OUTPUT_STT_DIR):
     _p.mkdir(exist_ok=True)
 
 __all__ = [
-    "logging",  # re-export so consumers can simply `from config import logging`
+    "logging",
     "DATASET_DIR",
     "TEMP_DIR",
 ]

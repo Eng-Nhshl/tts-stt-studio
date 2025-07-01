@@ -9,7 +9,7 @@ import librosa
 from collections import deque, defaultdict
 import time
 import warnings
-from config import logging  # sets up logging and provides paths
+from config import logging
 import random
 
 logger = logging.getLogger(__name__)
@@ -19,22 +19,11 @@ warnings.filterwarnings("ignore")
 
 
 class AnomalyDetector:
-    """Detects offensive or anomalous audio/text.
-
-    An instance is cheap; create one per `STT_TTS_Engine`.  Public API:
-
-    detect_offensive_content(text, language)
-    detect_audio_anomaly(audio_np, sample_rate)
-    detect_text_anomaly(text, language)
-    """
+    """Detects offensive or anomalous audio/text."""
 
     def __init__(self, n_samples=100, contamination=0.1):
-        """Initialize the anomaly detector.
+        """Initialize the anomaly detector."""
 
-        Args:
-            n_samples: Number of samples to maintain in history
-            contamination: Expected proportion of outliers in the data
-        """
         self.n_samples = n_samples
         self.contamination = contamination
         self.audio_features = deque(maxlen=n_samples)
@@ -65,15 +54,8 @@ class AnomalyDetector:
             logger.info("Models re-initialized successfully")
 
     def extract_audio_features(self, audio_data, sample_rate):
-        """Extract features from audio data.
+        """Extract features from audio data."""
 
-        Args:
-            audio_data: Array of audio samples
-            sample_rate: Sampling rate of the audio
-
-        Returns:
-            np.array: Feature vector
-        """
         try:
             # Extract basic audio features
             features = []
@@ -94,15 +76,8 @@ class AnomalyDetector:
             return None
 
     def extract_text_features(self, text, language="en"):
-        """Extract features from text data.
+        """Extract features from text data."""
 
-        Args:
-            text: Input text
-            language: Language of the text
-
-        Returns:
-            np.array: Extracted features
-        """
         try:
             # Clean text by removing special characters
             if language == "en":
@@ -147,15 +122,8 @@ class AnomalyDetector:
             return None
 
     def detect_audio_anomaly(self, audio_data, sample_rate):
-        """Detect anomalies in audio data.
+        """Detect anomalies in audio data."""
 
-        Args:
-            audio_data: Array of audio samples
-            sample_rate: Sampling rate of the audio
-
-        Returns:
-            bool: True if anomaly detected, False otherwise
-        """
         try:
             # Calculate basic statistics
             mean = np.mean(np.abs(audio_data))
@@ -197,6 +165,7 @@ class AnomalyDetector:
 
     def _initialize_models(self):
         """Initialize Isolation Forest models with initial samples."""
+
         try:
             # Generate initial samples for text model
             text_samples = []
@@ -255,11 +224,8 @@ class AnomalyDetector:
             print(f"Error initializing models: {str(e)}")
 
     def load_offensive_words(self) -> Dict[str, Set[str]]:
-        """Load offensive words from JSON files.
+        """Load offensive words from JSON files."""
 
-        Returns:
-            Dict mapping language to set of offensive words
-        """
         offensive_words = defaultdict(set)
         from config import DATASET_DIR
 
@@ -306,15 +272,8 @@ class AnomalyDetector:
         return offensive_words
 
     def detect_offensive_content(self, text: str, language: str = "en") -> bool:
-        """Detect offensive content in text.
+        """Detect offensive content in text."""
 
-        Args:
-            text: Input text to check
-            language: Language of the text ('en' or 'ar')
-
-        Returns:
-            bool: True if offensive content detected, False otherwise
-        """
         if language not in self.offensive_words:
             return False
 
@@ -329,15 +288,8 @@ class AnomalyDetector:
         return False
 
     def detect_text_anomaly(self, text, language="en"):
-        """Detect anomalies in text data.
+        """Detect anomalies in text data."""
 
-        Args:
-            text: Input text
-            language: Language of the text ('en' or 'ar')
-
-        Returns:
-            bool: True if anomaly detected, False otherwise
-        """
         # For Arabic text, be more lenient with character checks
         if language == "ar":
             # Arabic text can contain special characters like diacritics

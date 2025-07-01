@@ -1,41 +1,17 @@
-"""GUI front-end for the Multilingual TTS/STT Studio.
-
-This file contains only high-level GUI wiring:
-• lightweight worker threads that invoke the shared `STT_TTS_Engine`
-• `MainWindow` which assembles the widgets defined in `widgets.py`
-
-All visual styling lives in `styles.py`; reusable widgets live in
-`widgets.py`; speech logic lives in `core/engine.py`.
-
-Keeping those pieces separate means this file stays readable and focuses
-on signal/slot connections and layout rather than style or business
-logic.
-"""
-
 import sys
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import (
     QApplication,
     QWidget,
-    QLabel,
-    QPushButton,
     QVBoxLayout,
-    QHBoxLayout,
-    QLineEdit,
-    QTextEdit,
-    QTabWidget,
-    QMessageBox,
-    QComboBox,
     QProgressBar,
-    QFrame,
 )
 
-# --- Import shared engine from core ---
+# --- Import engine from core
 from core.engine import STT_TTS_Engine
 
-# Import extracted custom widgets
+# Import custom widgets
 from widgets import (
     GlassFrame,
     NeonButton,
@@ -47,22 +23,8 @@ from widgets import (
 )
 
 
-# ---------------------------------------------------------------------------
-# Worker threads
-# ---------------------------------------------------------------------------
-# QThread subclasses so that heavy TTS/STT work (network calls, microphone
-# blocking) never freeze the GUI. Each thread takes an `STT_TTS_Engine`
-# instance plus its parameters, does the work in `run()`, and emits Qt
-# signals back to the main thread for status/progress.
-
-
 class TTSThread(QThread):
-    """Background thread that converts *text* to speech.
-
-    Emits:
-        status(str): incremental status updates from the engine
-        finished(bool): True on success, False on error/offensive text
-    """
+    """Background thread that converts *text* to speech."""
 
     status = pyqtSignal(str)
     finished = pyqtSignal(bool)
@@ -79,12 +41,7 @@ class TTSThread(QThread):
 
 
 class STTThread(QThread):
-    """Background thread that listens to the microphone and performs STT.
-
-    Emits:
-        status(str): live status ("Listening…", etc.)
-        result(str): recognized text, or empty string on failure
-    """
+    """Background thread that listens to the microphone and performs STT."""
 
     status = pyqtSignal(str)
     result = pyqtSignal(str)
@@ -100,22 +57,8 @@ class STTThread(QThread):
 
 
 # --- Main GUI ---
-# ---------------------------------------------------------------------------
-# Main application window
-# ---------------------------------------------------------------------------
-
-
 class MainWindow(QWidget):
-    """Top-level window that hosts two tabs:
-
-    1. *Text → Speech*  — converts user-typed text into spoken audio using
-       the engine and shows progress.
-    2. *Speech → Text*  — captures microphone input, transcribes it, and
-       shows the resulting text.
-
-    The visual elements (buttons, labels, combo boxes) come from
-    `widgets.py` to keep styling & widget code DRY.
-    """
+    """Top-level window that hosts two tabs: TTS and STT."""
 
     def __init__(self):
         super().__init__()
@@ -138,7 +81,6 @@ class MainWindow(QWidget):
         self.showNormal()
 
     def init_ui(self):
-        # Title
         title = TitleLabel("✨ AI Multilingual TTS & STT Studio ✨")
 
         # Tabs
@@ -233,7 +175,6 @@ class MainWindow(QWidget):
         if result:
             self.tts_status.setText("Text successfully converted to speech.")
         else:
-            # Keep any specific error message already provided by the engine
             current = self.tts_status.text()
             if not current.startswith("Error"):
                 self.tts_status.setText("Could not convert text to speech.")
@@ -256,7 +197,6 @@ class MainWindow(QWidget):
             self.stt_result.setPlainText(text)
             self.stt_status.setText("Speech recognized successfully.")
         else:
-            # Clear text but keep any detailed error message already set via status callback
             self.stt_result.setPlainText("")
             current = self.stt_status.text()
             if not current.startswith("Error"):
@@ -266,9 +206,7 @@ class MainWindow(QWidget):
 # --- Main Entrypoint ---
 def main():
     app = QApplication(sys.argv)
-    # Set awesome font for all
     app.setFont(QtGui.QFont("Segoe UI", 11))
-    # Optional: Add a window shadow for wow effect (on supported platforms)
     window = MainWindow()
     window.setWindowFlags(
         window.windowFlags() | QtCore.Qt.Window | QtCore.Qt.MSWindowsFixedSizeDialogHint

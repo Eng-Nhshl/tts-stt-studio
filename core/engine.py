@@ -11,8 +11,8 @@ import numpy as np
 import pygame
 import speech_recognition as sr
 from gtts import gTTS
-from arabic_reshaper import reshape  # noqa: F401  (kept for future use)
-from bidi.algorithm import get_display  # noqa: F401
+from arabic_reshaper import reshape
+from bidi.algorithm import get_display
 
 from anomaly_detector import AnomalyDetector
 from config import logging  # sets up root logger
@@ -43,7 +43,6 @@ def _notify(cb: Optional[Callable[[str], None]], message: str) -> None:
 # Core engine
 # ---------------------------------------------------------------------------
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,39 +64,39 @@ class STT_TTS_Engine:
         language: str = "en",
         status_callback: Optional[Callable[[str], None]] = None,
     ) -> bool:
-        """Convert *text* into audible speech.
-
-        Returns ``True`` on success, ``False`` otherwise.
-        """
+        """Convert *text* into audible speech."""
         try:
             if not text:
-                _notify(status_callback, "Error: No text provided for conversion")
-                raise ValueError("No text provided for conversion")
+                _notify(status_callback, "Error: No text provided for conversion!")
+                raise ValueError("No text provided for conversion!")
 
             # Check for offensive content
             if self.anomaly_detector.detect_offensive_content(text, language):
-                _notify(status_callback, "Error: Text contains offensive content")
-                raise ValueError("Text contains offensive content")
+                _notify(status_callback, "Error: Text contains offensive content!")
+                raise ValueError("Text contains offensive content!")
 
             # Remove special characters that should be ignored when speaking
             import re
 
-            cleaned_text = re.sub(r'[!@#$%^&*()_+]+', ' ', text)
-            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(r"[!@#$%^&*()_+]+", " ", text)
+            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
             # Remove text not matching the selected language script
             if language == "ar":
                 # Strip Latin letters when speaking Arabic
-                cleaned_text = re.sub(r'[A-Za-z]+', ' ', cleaned_text)
+                cleaned_text = re.sub(r"[A-Za-z]+", " ", cleaned_text)
             elif language == "en":
                 # Strip Arabic letters when speaking English
-                cleaned_text = re.sub(r'[\u0600-\u06FF]+', ' ', cleaned_text)
+                cleaned_text = re.sub(r"[\u0600-\u06FF]+", " ", cleaned_text)
 
-            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
             if not cleaned_text:
-                _notify(status_callback, "Error: No speakable content after language filtering")
-                raise ValueError("No speakable content after language filtering")
+                _notify(
+                    status_callback,
+                    "Error: No speakable content after language filtering!",
+                )
+                raise ValueError("No speakable content after language filtering!")
 
             logger.info(
                 "Converting text to speech. Language: %s, Original: %s, Cleaned: %s",
@@ -165,7 +164,7 @@ class STT_TTS_Engine:
                     logger.info("Text-to-speech playback completed successfully")
                     return True
                 except Exception:
-                    _notify(status_callback, "Error: Audio playback failed")
+                    _notify(status_callback, "Error: Audio playback failed!")
                     logger.warning(
                         "Audio file produced but playback failed; continuing without playback."
                     )
@@ -178,7 +177,7 @@ class STT_TTS_Engine:
                     try:
                         os.remove(temp_filename)
                         break
-                    except Exception as exc:  # pragma: no cover – best-effort cleanup
+                    except Exception as exc:
                         logger.debug(
                             "Attempt %d to delete temp file failed: %s",
                             attempt + 1,

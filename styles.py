@@ -15,7 +15,7 @@ QPushButton {
     border-radius: 18px;
     border: none;
     padding: 10px 28px;
-    font-size: 1.2em;
+    font-size: 14px;
     font-weight: bold;
 }
 QPushButton:hover {
@@ -28,7 +28,7 @@ QPushButton:pressed {
 
 TITLE_LABEL = """
 QLabel {
-    font-size: 2.2em;
+    font-size: 20px;
     font-family: 'Segoe UI', 'Arial', sans-serif;
     color: #fff;
     margin: 18px 0 0 0;
@@ -50,7 +50,7 @@ QTabBar::tab {
     min-height: 36px;
     min-width: 150px;
     font-weight: 600;
-    font-size: 1.1em;
+    font-size: 15px;
     margin-right: 4px;
     padding: 8px 24px;
 }
@@ -67,7 +67,7 @@ QComboBox {
     border-radius: 12px;
     border: 1px solid #3d1cbe;
     padding: 6px 18px;
-    font-size: 1.05em;
+    font-size: 15px;
 }
 QComboBox QAbstractItemView {
     background: #24243e;
@@ -81,7 +81,7 @@ QTextEdit {
     color: #fff;
     border-radius: 12px;
     border: 1.5px solid #00d2ff;
-    font-size: 1.07em;
+    font-size: 17px;
     padding: 8px 10px;
     min-height: 80px;
 }
@@ -90,7 +90,7 @@ QTextEdit {
 GLASS_LABEL = """
 QLabel {
     color: #e0e5ff;
-    font-size: 1.04em;
+    font-size: 14px;
     margin-top: 12px;
     font-weight: 500;
     background: qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 rgba(224,229,255,0.2), stop:1 rgba(224,229,255,0.1));

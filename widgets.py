@@ -1,15 +1,12 @@
-"""Reusable, style-rich PyQt5 widgets.
-
-Only visual concerns live here – no business logic.  Styles are applied
-via constants imported from `styles.py`, making it trivial to tweak the
-look & feel in one place.
-
-Import these widgets wherever you need them::
-
-    from widgets import NeonButton, GlassTextEdit
-"""
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFrame, QPushButton, QLabel, QTabWidget, QComboBox, QTextEdit
+from PyQt5.QtWidgets import (
+    QFrame,
+    QPushButton,
+    QLabel,
+    QTabWidget,
+    QComboBox,
+    QTextEdit,
+)
 
 import styles as _styles
 
@@ -59,6 +56,7 @@ class GlassTabWidget(QTabWidget):
 
 class GlassComboBox(QComboBox):
     """Combo box with transparent backdrop matching the glass theme."""
+
     def __init__(self):
         super().__init__()
         self.setStyleSheet(_styles.GLASS_COMBO_BOX)
@@ -66,6 +64,7 @@ class GlassComboBox(QComboBox):
 
 class GlassTextEdit(QTextEdit):
     """Text area styled for dark glass UI."""
+
     def __init__(self):
         super().__init__()
         self.setStyleSheet(_styles.GLASS_TEXT_EDIT)
@@ -73,6 +72,7 @@ class GlassTextEdit(QTextEdit):
 
 class GlassLabel(QLabel):
     """Secondary label for hint/status texts inside glass panels."""
+
     def __init__(self, text: str = ""):
         super().__init__(text)
         self.setStyleSheet(_styles.GLASS_LABEL)
