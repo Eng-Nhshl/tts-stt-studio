@@ -1,13 +1,3 @@
-"""Shared speech-to-text / text-to-speech engine.
-
-This is extracted from the previous inline implementation in both
-`main.py` and `stt_tts_gui.py` so that all front-ends (CLI, GUI,
-future web or mobile clients) rely on exactly the same core logic.
-
-The public surface is the `STT_TTS_Engine` class – identical behaviour
-as before, but with a helper `_notify()` that gracefully handles either
-plain callables or Qt `pyqtSignal`s passed in as `status_callback`.
-"""
 from __future__ import annotations
 
 import os
@@ -34,6 +24,7 @@ np.set_printoptions(precision=3, suppress=True)
 # Utility helpers
 # ---------------------------------------------------------------------------
 
+
 def _notify(cb: Optional[Callable[[str], None]], message: str) -> None:
     """Send *message* through *cb* if given.
 
@@ -54,6 +45,7 @@ def _notify(cb: Optional[Callable[[str], None]], message: str) -> None:
 
 
 logger = logging.getLogger(__name__)
+
 
 class STT_TTS_Engine:
     """Multilingual Speech-to-Text / Text-to-Speech engine."""
@@ -87,7 +79,9 @@ class STT_TTS_Engine:
                 _notify(status_callback, "Error: Text contains offensive content")
                 raise ValueError("Text contains offensive content")
 
-            logger.info("Converting text to speech. Language: %s, Text: %s", language, text)
+            logger.info(
+                "Converting text to speech. Language: %s, Text: %s", language, text
+            )
 
             from hashlib import sha1
             from config import CACHE_DIR
@@ -102,20 +96,28 @@ class STT_TTS_Engine:
             else:
                 logger.debug("Cache miss for TTS request (lang=%s)", language)
                 # Generate in temp dir then move to cache
-                temp_filename = os.path.join(tempfile.gettempdir(), f"tts_{uuid.uuid4()}.mp3")
+                temp_filename = os.path.join(
+                    tempfile.gettempdir(), f"tts_{uuid.uuid4()}.mp3"
+                )
                 # Synthesize speech and save
                 gTTS(text=text, lang=language).save(temp_filename)
                 try:
                     import shutil
+
                     shutil.move(temp_filename, cached_mp3)
                     temp_filename = str(cached_mp3)
                 except Exception as move_exc:
                     logger.warning("Could not move MP3 to cache: %s", move_exc)
 
             from config import OUTPUT_TTS_DIR
+
             # Copy final mp3 to outputs directory with timestamp for user reference
             import shutil, datetime
-            out_name = OUTPUT_TTS_DIR / f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{cache_key}.mp3"
+
+            out_name = (
+                OUTPUT_TTS_DIR
+                / f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{cache_key}.mp3"
+            )
             try:
                 shutil.copy2(temp_filename, out_name)
                 logger.debug("Saved TTS output to %s", out_name)
@@ -141,7 +143,9 @@ class STT_TTS_Engine:
                     return True
                 except Exception:
                     _notify(status_callback, "Error: Audio playback failed")
-                    logger.warning("Audio file produced but playback failed; continuing without playback.")
+                    logger.warning(
+                        "Audio file produced but playback failed; continuing without playback."
+                    )
                     return True  # File was produced successfully
                 finally:
                     pygame.mixer.quit()
@@ -152,12 +156,19 @@ class STT_TTS_Engine:
                         os.remove(temp_filename)
                         break
                     except Exception as exc:  # pragma: no cover – best-effort cleanup
-                        logger.debug("Attempt %d to delete temp file failed: %s", attempt + 1, exc)
+                        logger.debug(
+                            "Attempt %d to delete temp file failed: %s",
+                            attempt + 1,
+                            exc,
+                        )
                         if attempt == 2:
-                            logger.warning("Could not delete temp file %s after 3 attempts", temp_filename)
+                            logger.warning(
+                                "Could not delete temp file %s after 3 attempts",
+                                temp_filename,
+                            )
                         else:
                             time.sleep(0.1)
-            return True
+                return True
         except ValueError as ve:
             logger.error("Error in text_to_speech: %s", ve)
             return False
@@ -189,10 +200,15 @@ class STT_TTS_Engine:
                     _notify(status_callback, "Processing speech...")
 
                     # Extract audio features
-                    audio_data = np.frombuffer(audio.get_raw_data(), np.int16).astype(np.float32) / 32768.0
+                    audio_data = (
+                        np.frombuffer(audio.get_raw_data(), np.int16).astype(np.float32)
+                        / 32768.0
+                    )
                     sample_rate = audio.sample_rate
 
-                    if self.anomaly_detector.detect_audio_anomaly(audio_data, sample_rate):
+                    if self.anomaly_detector.detect_audio_anomaly(
+                        audio_data, sample_rate
+                    ):
                         raise ValueError("Audio contains suspicious patterns")
 
                     # Convert audio to text
@@ -205,8 +221,12 @@ class STT_TTS_Engine:
 
                     from config import OUTPUT_STT_DIR
                     import datetime, pathlib
+
                     try:
-                        outfile = OUTPUT_STT_DIR / f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                        outfile = (
+                            OUTPUT_STT_DIR
+                            / f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                        )
                         pathlib.Path(outfile).write_text(text, encoding="utf-8")
                         logger.debug("Saved STT result to %s", outfile)
                     except Exception as write_exc:
@@ -218,7 +238,9 @@ class STT_TTS_Engine:
                 except sr.UnknownValueError:
                     raise ValueError("Could not understand audio")
                 except sr.RequestError as exc:
-                    raise ValueError(f"Speech recognition service error: {exc}") from exc
+                    raise ValueError(
+                        f"Speech recognition service error: {exc}"
+                    ) from exc
         except Exception as exc:
             logger.error("Error in speech_to_text: %s", exc)
             return ""

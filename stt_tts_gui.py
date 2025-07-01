@@ -55,6 +55,7 @@ from widgets import (
 # instance plus its parameters, does the work in `run()`, and emits Qt
 # signals back to the main thread for status/progress.
 
+
 class TTSThread(QThread):
     """Background thread that converts *text* to speech.
 
@@ -62,6 +63,7 @@ class TTSThread(QThread):
         status(str): incremental status updates from the engine
         finished(bool): True on success, False on error/offensive text
     """
+
     status = pyqtSignal(str)
     finished = pyqtSignal(bool)
 
@@ -83,6 +85,7 @@ class STTThread(QThread):
         status(str): live status ("Listening…", etc.)
         result(str): recognized text, or empty string on failure
     """
+
     status = pyqtSignal(str)
     result = pyqtSignal(str)
 
@@ -101,6 +104,7 @@ class STTThread(QThread):
 # Main application window
 # ---------------------------------------------------------------------------
 
+
 class MainWindow(QWidget):
     """Top-level window that hosts two tabs:
 
@@ -112,6 +116,7 @@ class MainWindow(QWidget):
     The visual elements (buttons, labels, combo boxes) come from
     `widgets.py` to keep styling & widget code DRY.
     """
+
     def __init__(self):
         super().__init__()
         self.engine = STT_TTS_Engine()

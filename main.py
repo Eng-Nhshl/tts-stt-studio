@@ -16,6 +16,7 @@ class TestSTT_TTS_Engine(unittest.TestCase):
     actual sound playback issues (e.g., in CI or headless environments)
     by catching exceptions raised from pygame.
     """
+
     def setUp(self):
         self.app = STT_TTS_Engine()
 
@@ -64,7 +65,7 @@ def main():
     """Simple text-based menu for casual testing from the terminal."""
     app = STT_TTS_Engine()
 
-        # --- Simple REPL menu ------------------------------------------------
+    # --- Simple REPL menu ------------------------------------------------
     while True:
         print("\nMultilingual TTS & STT Application")
         print("1. Text to Speech (English)")
